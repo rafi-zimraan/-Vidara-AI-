@@ -3,7 +3,7 @@
 
 -- 0. Extensions
 create extension if not exists "pgcrypto";
-create extension if not exists "pgvector";
+-- pgvector: enable via Supabase Dashboard > Database > Extensions if needed
 
 -- 1. Profiles (syncs with auth.users via trigger)
 create table if not exists public.profiles (
