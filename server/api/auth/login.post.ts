@@ -23,6 +23,8 @@ export default defineEventHandler(async (event) => {
   return createSuccessResponse({
     user_id: data.user.id,
     email: data.user.email,
+    name: data.user.user_metadata?.name || data.user.email?.split('@')[0],
+    avatar_url: data.user.user_metadata?.avatar_url,
     access_token: data.session.access_token,
     refresh_token: data.session.refresh_token,
     expires_in: data.session.expires_in,

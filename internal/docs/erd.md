@@ -110,6 +110,7 @@ erDiagram
     Workspace ||--o{ WorkspaceMember : has
     Workspace ||--o{ Project : contains
     Workspace ||--o{ Niche : defines
+    Voice ||--o{ Project : used-in
     Niche ||--o{ Project : categorized-as
     Workspace ||--o{ Folder : contains
     Workspace ||--o{ Asset : stores
@@ -532,9 +533,12 @@ classDiagram
 | | visibility | VARCHAR(20) | NO | 'private' | | Enum: private, unlisted, public |
 | | youtube_video_id | VARCHAR(50) | YES | — | | |
 | | youtube_url | TEXT | YES | — | | |
+| | voice_id | UUID | YES | — | FK→voices | SET NULL — selected voice profile |
+| | scheduled_publish_at | TIMESTAMPTZ | YES | — | | Null = publish immediately |
+| | publish_config | JSONB | NO | '{}' | | playlist_id, monetization, made_for_kids, notify_subscribers |
 | | credits_used | INTEGER | NO | 0 | | |
 | | config | JSONB | NO | '{}' | | Resolution, codec, quality |
-| | metadata | JSONB | NO | '{}' | | SEO data, tags |
+| | metadata | JSONB | NO | '{}' | | SEO data, tags, thumbnail CTR |
 | | version | INTEGER | NO | 1 | | Optimistic lock |
 | | started_at | TIMESTAMPTZ | YES | — | | |
 | | completed_at | TIMESTAMPTZ | YES | — | | |
@@ -662,7 +666,7 @@ classDiagram
 | | agent_id | UUID | NO | — | FK→ai_agents | |
 | | workflow_id | VARCHAR(100) | YES | — | | Temporal workflow ID |
 | | step_name | VARCHAR(100) | NO | — | | |
-| | status | VARCHAR(20) | NO | 'pending' | | Enum |
+| | status | VARCHAR(20) | NO | 'pending' | | Enum: pending, running, paused, completed, failed, skipped, retrying |
 | | priority | INTEGER | NO | 0 | | |
 | | input_data | JSONB | YES | — | | |
 | | output_data | JSONB | YES | — | | |
@@ -739,6 +743,20 @@ classDiagram
 | | ip_address | INET | YES | — | | |
 | | user_agent | TEXT | YES | — | | |
 
+| **voices** | id | UUID | NO | gen_random_uuid() | PK | |
+| | name | VARCHAR(100) | NO | — | | Internal name e.g. "arjuna" |
+| | display_name | VARCHAR(200) | NO | — | | UI label e.g. "Arjuna · Epik" |
+| | language | VARCHAR(10) | NO | 'id' | | Language code |
+| | gender | VARCHAR(10) | YES | — | | Enum: male, female, neutral |
+| | style | VARCHAR(50) | YES | — | | e.g. "epik", "formal", "casual" |
+| | provider | VARCHAR(50) | NO | — | | Enum: elevenlabs, openai, deepgram, internal |
+| | provider_voice_id | VARCHAR(100) | YES | — | | External ID at provider |
+| | preview_url | TEXT | YES | — | | Short audio preview URL |
+| | is_active | BOOLEAN | NO | TRUE | | |
+| | is_public | BOOLEAN | NO | TRUE | | Available to all users |
+| | sort_order | INTEGER | NO | 0 | | UI display order |
+| | created_at | TIMESTAMPTZ | NO | NOW() | | |
+
 | **niches** | id | UUID | NO | gen_random_uuid() | PK | |
 | | workspace_id | UUID | NO | — | FK→workspaces | Unique composite (workspace_id, slug) |
 | | name | VARCHAR(100) | NO | — | | Unique per workspace |
@@ -782,6 +800,7 @@ classDiagram
 | Workspace | Folder | workspace_id | CASCADE |
 | Workspace | Asset | workspace_id | CASCADE |
 | Folder | Project | folder_id | SET NULL |
+| Voice | Project | voice_id | SET NULL |
 | Project | Scene | project_id | CASCADE |
 | Project | Script | project_id | CASCADE |
 | Project | AgentTask | project_id | CASCADE |

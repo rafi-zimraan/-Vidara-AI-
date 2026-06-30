@@ -11,18 +11,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f5ff',
-          100: '#e0eaff',
-          200: '#c2d6ff',
-          300: '#a3c2ff',
-          400: '#6690ff',
-          500: '#3366ff',
-          600: '#0044ff',
-          700: '#0033cc',
-          800: '#002299',
-          900: '#001166',
+        vidara: {
+          bg: '#08080F',
+          surface: '#0E0E1A',
+          border: 'rgba(255,255,255,0.08)',
+          purple: '#8B5CF6',
+          cyan: '#22D3EE',
+          text: '#ECECF5',
+          muted: 'rgba(236,236,245,0.5)',
         },
+        primary: {
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#8B5CF6',
+          600: '#7c3aed',
+          700: '#6d28d9',
+          800: '#5b21b6',
+          900: '#4c1d95',
+        },
+      },
+      fontFamily: {
+        heading: ['Space Grotesk', 'sans-serif'],
+        sans: ['Manrope', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-vidara': 'linear-gradient(135deg, #8B5CF6, #22D3EE)',
       },
     },
   },

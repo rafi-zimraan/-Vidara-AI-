@@ -262,6 +262,9 @@ CREATE TABLE projects (
                           CHECK (visibility IN ('private','unlisted','public')),
     youtube_video_id      VARCHAR(50),
     youtube_url           TEXT,
+    voice_id              UUID REFERENCES voices(id) ON DELETE SET NULL,
+    scheduled_publish_at  TIMESTAMPTZ,
+    publish_config        JSONB DEFAULT '{}',
     credits_used          INTEGER DEFAULT 0,
     config                JSONB DEFAULT '{}',
     metadata              JSONB DEFAULT '{}',
@@ -470,7 +473,7 @@ CREATE TABLE agent_tasks (
     workflow_id     VARCHAR(100),
     step_name       VARCHAR(100) NOT NULL,
     status          VARCHAR(20) NOT NULL DEFAULT 'pending'
-                    CHECK (status IN ('pending','running','completed','failed','skipped','retrying')),
+                    CHECK (status IN ('pending','running','paused','completed','failed','skipped','retrying')),
     priority        INTEGER DEFAULT 0,
     input_data      JSONB,
     output_data     JSONB,
@@ -715,6 +718,27 @@ CREATE TABLE user_sessions (
 );
 ```
 
+### 9.11 Voices (Voice Profile Catalog)
+
+```sql
+CREATE TABLE voices (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name              VARCHAR(100) NOT NULL,
+    display_name      VARCHAR(200) NOT NULL,
+    language          VARCHAR(10) NOT NULL DEFAULT 'id',
+    gender            VARCHAR(10) CHECK (gender IN ('male','female','neutral')),
+    style             VARCHAR(50),
+    provider          VARCHAR(50) NOT NULL
+                      CHECK (provider IN ('elevenlabs','openai','deepgram','internal')),
+    provider_voice_id VARCHAR(100),
+    preview_url       TEXT,
+    is_active         BOOLEAN DEFAULT TRUE,
+    is_public         BOOLEAN DEFAULT TRUE,
+    sort_order        INTEGER DEFAULT 0,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
 ---
 
 ## 10. Indexing Strategy
@@ -727,7 +751,13 @@ CREATE INDEX idx_users_email ON users(email) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_provider ON users(auth_provider) WHERE is_active = TRUE;
 CREATE INDEX idx_users_last_login ON users(last_login_at DESC);
 
+-- Voices
+CREATE INDEX idx_voices_language ON voices(language) WHERE is_active = TRUE;
+CREATE INDEX idx_voices_public ON voices(sort_order ASC) WHERE is_public = TRUE AND is_active = TRUE;
+
 -- Projects
+CREATE INDEX idx_projects_voice ON projects(voice_id);
+CREATE INDEX idx_projects_scheduled ON projects(scheduled_publish_at) WHERE scheduled_publish_at IS NOT NULL;
 CREATE INDEX idx_projects_workspace ON projects(workspace_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_projects_owner ON projects(owner_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_projects_status ON projects(status) WHERE status IN ('queued','generating');

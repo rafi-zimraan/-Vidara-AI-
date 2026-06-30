@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
 
-  if (path.startsWith('/api/auth/') || path === '/api/health' || path.startsWith('/api/billing/plans')) {
+  if (path.startsWith('/api/auth/') || path === '/api/health' || path.startsWith('/api/billing/plans') || path.startsWith('/api/admin/')) {
     return
   }
 

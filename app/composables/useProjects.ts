@@ -5,6 +5,7 @@ interface Project {
   status: string
   language: string
   target_duration_secs?: number
+  target_duration_seconds?: number
   aspect_ratio: string
   resolution: string
   created_at: string

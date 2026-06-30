@@ -31,7 +31,8 @@ export const useAuth = () => {
       user.value = {
         id: res.data.user_id,
         email: res.data.email,
-        name: res.data.email.split('@')[0],
+        name: res.data.name || res.data.email.split('@')[0],
+        avatar_url: res.data.avatar_url,
       }
       return res.data
     } finally {

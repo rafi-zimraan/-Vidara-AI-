@@ -1,11 +1,19 @@
 export default defineEventHandler(async (event) => {
-  const { email, password, name } = await readBody(event)
+  const { email, password, name, phone } = await readBody(event)
 
   if (!email || !password) {
     throw createError({
       statusCode: 422,
       statusMessage: 'VALIDATION_ERROR',
-      message: 'Email and password are required',
+      message: 'Email dan password wajib diisi',
+    })
+  }
+
+  if (password.length < 8) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'VALIDATION_ERROR',
+      message: 'Password minimal 8 karakter',
     })
   }
 
@@ -13,8 +21,12 @@ export default defineEventHandler(async (event) => {
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     password,
+    phone: phone || undefined,
     email_confirm: true,
-    user_metadata: { name: name || email.split('@')[0] },
+    user_metadata: {
+      name: name || email.split('@')[0],
+      phone: phone || null,
+    },
   })
 
   if (error) {
