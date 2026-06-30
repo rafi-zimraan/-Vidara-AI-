@@ -6,3 +6,5 @@ vendor/
 *log
 dist/
 .build/
+.nuxt/
+.output/
